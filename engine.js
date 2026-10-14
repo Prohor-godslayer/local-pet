@@ -171,18 +171,19 @@ function applyHours(pet, hours, now) {
   const wasSick = pet.sick;
   pet.sick = pet.st.hunger < 8 || pet.st.clean < 8;
   if (pet.sick && !wasSick) pet.mo.joy = clamp(pet.mo.joy - 10);
-  const neglected = now - (pet.lastCare || 0);
-  if (neglected >= 8 * HOUR && hours >= 1) {
-    pet.mo.hurt = clamp(pet.mo.hurt + Math.min(12, neglected / HOUR / 4));
-    pet.bond = clamp(pet.bond - Math.min(4, hours / 8));
-  }
   pet.mo.joy = clamp(pet.mo.joy - hours * 0.4);
   pet.mo.hurt = clamp(pet.mo.hurt - hours * 0.15);
   pet.mo.jeal = clamp(pet.mo.jeal - hours * 0.5);
+  const caredAt = pet.lastCare == null ? (pet.born || now) : pet.lastCare;
+  const neglected = now - caredAt;
+  if (neglected >= 8 * HOUR && hours >= 1) {
+    pet.mo.hurt = clamp(pet.mo.hurt + Math.min(24, neglected / HOUR / 6));
+    pet.bond = clamp(pet.bond - Math.min(8, hours / 6));
+  }
 }
 
 function tickPet(pet, now) {
-  const prev = pet.lastTick || now;
+  const prev = pet.lastTick == null ? now : pet.lastTick;
   let elapsed = now - prev;
   if (elapsed < 0) elapsed = 0;
   if (elapsed > 14 * 24 * HOUR) elapsed = 14 * 24 * HOUR;
